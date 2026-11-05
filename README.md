@@ -10,7 +10,7 @@ The Raspberry Pi that runs the [sensor logger](https://github.com/HannaBeshoy/pi
 - [x] `audit.sh`: checks every setting on the running machine and prints PASS or FAIL
 - [x] `crypto/`: log export from the Pi to the PC with AES-256-CBC, the key wrapped with RSA-OAEP, and an Ed25519 signature by the Pi; works with the PC's existing `ssh-keygen` RSA key; ECB vs CBC demonstration
 - [x] An SSH tunnel to the logger's port, with a packet capture that shows the reading in clear on plain TCP and hidden inside SSH
-- [x] **29 tests pass**, and CI hardens a real Ubuntu virtual machine and audits it
+- [x] **29 tests pass**, and CI hardens a real Ubuntu virtual machine (firewall and LUKS volume included) and audits it: **all 13 `audit.sh` checks PASS**
 - [ ] Lab day: on the Raspberry Pi, with an attack test from a second computer ([test sheet](docs/LAB_DAY.md))
 
 ## What it protects against
