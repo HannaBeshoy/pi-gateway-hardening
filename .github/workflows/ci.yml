@@ -1,0 +1,20 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tools
+        run: |
+          sudo DEBIAN_FRONTEND=noninteractive apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
+            openssh-server nftables cryptsetup tcpdump sudo
+      - name: Configuration, crypto and SSH tunnel tests, then harden this VM and audit it
+        run: sudo SYSTEM_TESTS=1 CAPTURE_DIR=/tmp/capture bash tests/run_tests.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: plain-vs-tunnel-capture
+          path: /tmp/capture/

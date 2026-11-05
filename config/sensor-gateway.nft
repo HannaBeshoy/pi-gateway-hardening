@@ -1,0 +1,24 @@
+#!/usr/sbin/nft -f
+# /etc/nftables.d/sensor-gateway.nft - installed by harden.sh
+# Default: drop everything coming in, except what the gateway is for.
+# LAN is replaced by harden.sh with the local network (default 192.168.0.0/16).
+table inet sensor_gateway
+delete table inet sensor_gateway
+table inet sensor_gateway {
+    chain input {
+        type filter hook input priority 0; policy drop;
+        ct state established,related accept
+        ct state invalid drop
+        iif "lo" accept
+        ip protocol icmp icmp type echo-request limit rate 5/second accept
+        ip6 nexthdr icmpv6 accept
+        ip saddr LAN tcp dport 22 ct state new limit rate 10/minute accept
+        ip saddr LAN tcp dport 5600 accept
+        ip saddr LAN udp dport 5601 accept
+        udp dport 68 accept
+        counter drop
+    }
+    chain forward {
+        type filter hook forward priority 0; policy drop;
+    }
+}

@@ -1,0 +1,12 @@
+# /etc/sudoers.d/sensor-ops - installed by harden.sh (checked with visudo -c first)
+# The operators may manage the logger service and shut the Pi down, nothing else:
+# no shell, no editor, no "ALL" - each command with its exact arguments. ops has no
+# password at all (login is by SSH key only), so these few commands need none.
+Cmnd_Alias SENSOR_SERVICE = /usr/bin/systemctl status sensor-logger, \
+                            /usr/bin/systemctl restart sensor-logger, \
+                            /usr/bin/systemctl stop sensor-logger, \
+                            /usr/bin/systemctl start sensor-logger, \
+                            /usr/bin/journalctl -u sensor-logger
+Cmnd_Alias SENSOR_POWER   = /usr/sbin/shutdown -h now, /usr/sbin/shutdown -r now
+%sensor-ops ALL=(root) NOPASSWD: SENSOR_SERVICE, SENSOR_POWER
+Defaults:%sensor-ops logfile=/var/log/sudo-sensor-ops.log
