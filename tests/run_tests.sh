@@ -61,7 +61,9 @@ check "export then import gives back the same file" \
   "./crypto/import_logs.sh $W/exp.tar $K/pc_private.pem $K/pi_public.pem $W/in && cmp $W/2026-11-05.csv $W/in/2026-11-05.csv"
 check "the export does not contain the log in clear" "! tar -xOf $W/exp.tar | grep -qF \"\$(sed -n 100p $W/2026-11-05.csv)\""
 mkdir -p "$W/t" && tar -C "$W/t" -xf "$W/exp.tar"
-printf '\x01' | dd of="$W/t/data.enc" bs=1 seek=5000 conv=notrunc status=none
+# flip one bit of byte 5000 (writing a fixed value would change nothing if the byte already had it)
+B=$(dd if="$W/t/data.enc" bs=1 skip=5000 count=1 status=none | od -An -tu1 | tr -d ' ')
+printf "\\x$(printf %02x $(( B ^ 1 )))" | dd of="$W/t/data.enc" bs=1 seek=5000 conv=notrunc status=none
 tar -C "$W/t" -cf "$W/tampered.tar" key.enc data.enc sig
 check "one changed byte in the data is detected" "! ./crypto/import_logs.sh $W/tampered.tar $K/pc_private.pem $K/pi_public.pem $W/x"
 ./crypto/make_keys.sh pi "$W/other" >/dev/null
